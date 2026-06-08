@@ -1,0 +1,23 @@
+# Mirrors .github/workflows/ci.yml (ruff + mypy). Pytest stays in CI only.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.16
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^(src|tests)/
+      - id: ruff-format
+        files: ^(src|tests)/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - aiofiles>=24.1.0
+          - httpx>=0.27.0
+          - pydantic>=2.8.0
+          - types-aiofiles>=24.1.0
+        args: [--config-file=pyproject.toml]
+        pass_filenames: false
+        entry: mypy src

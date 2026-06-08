@@ -14,44 +14,44 @@ Use this when refactoring **`diri-cyrex`** (`app/agents/tools/comprehensive_api_
 
 ### `ComprehensiveAPITools` (portable subset)
 
-| Cyrex tool name | Toolbox implementation | `ToolRunner` name (when configured) | Notes |
-|-----------------|-------------------------|-------------------------------------|--------|
-| `http_get` | `AsyncHttpToolbox.get` | `http_get` (requires `http=`) | Optional URL prefix / private-IP checks; Cyrex historically used plain `httpx` with no allowlist. |
-| `http_post` | `AsyncHttpToolbox.post` | `http_post` | JSON body via `json_body=`. |
-| `http_request` | `AsyncHttpToolbox.request` | `http_request` | Cyrex mapped `data` to query vs JSON ambiguously; toolbox uses explicit `query_params` / `json_body`. |
-| `json_parse` | `data.json_parse` | `json_parse` | |
-| `json_format` | `data.json_format` | `json_format` | |
-| `data_transform` | `data.data_transform` | `data_transform` | |
-| `calculate` | `data.calculate` / `safe_calculate` | `calculate` | **Not bitwise-identical to Cyrex** (see below). |
-| `statistics` | `data.statistics_tool` | `statistics` | |
-| `text_summarize` | `data.text_summarize` | `text_summarize` | Same simple extractive idea as Cyrex. |
-| `text_extract` | `data.text_extract` | `text_extract` | |
-| `get_current_time` | `data.current_time` | `current_time` | Cyrex used `timezone` + `format` kwargs; pass `timezone_name=` and `format=` to `data.current_time`. |
+| Cyrex tool name    | Toolbox implementation              | `ToolRunner` name (when configured) | Notes                                                                                                 |
+| ------------------ | ----------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `http_get`         | `AsyncHttpToolbox.get`              | `http_get` (requires `http=`)       | Optional URL prefix / private-IP checks; Cyrex historically used plain `httpx` with no allowlist.     |
+| `http_post`        | `AsyncHttpToolbox.post`             | `http_post`                         | JSON body via `json_body=`.                                                                           |
+| `http_request`     | `AsyncHttpToolbox.request`          | `http_request`                      | Cyrex mapped `data` to query vs JSON ambiguously; toolbox uses explicit `query_params` / `json_body`. |
+| `json_parse`       | `data.json_parse`                   | `json_parse`                        |                                                                                                       |
+| `json_format`      | `data.json_format`                  | `json_format`                       |                                                                                                       |
+| `data_transform`   | `data.data_transform`               | `data_transform`                    |                                                                                                       |
+| `calculate`        | `data.calculate` / `safe_calculate` | `calculate`                         | **Not bitwise-identical to Cyrex** (see below).                                                       |
+| `statistics`       | `data.statistics_tool`              | `statistics`                        |                                                                                                       |
+| `text_summarize`   | `data.text_summarize`               | `text_summarize`                    | Same simple extractive idea as Cyrex.                                                                 |
+| `text_extract`     | `data.text_extract`                 | `text_extract`                      |                                                                                                       |
+| `get_current_time` | `data.current_time`                 | `current_time`                      | Cyrex used `timezone` + `format` kwargs; pass `timezone_name=` and `format=` to `data.current_time`.  |
 
 ### `utility_tools.py`
 
-| Cyrex registration | Toolbox | `ToolRunner` | Notes |
-|--------------------|---------|--------------|--------|
-| `format_json` | `data.json_format` | `json_format` | Same role. |
-| `parse_json` | `data.json_parse` | `json_parse` | |
-| `calculate` | `data.calculate` | `calculate` | Same **AST/safe** behavior as above—not Cyrex `eval`. |
+| Cyrex registration | Toolbox            | `ToolRunner`  | Notes                                                 |
+| ------------------ | ------------------ | ------------- | ----------------------------------------------------- |
+| `format_json`      | `data.json_format` | `json_format` | Same role.                                            |
+| `parse_json`       | `data.json_parse`  | `json_parse`  |                                                       |
+| `calculate`        | `data.calculate`   | `calculate`   | Same **AST/safe** behavior as above—not Cyrex `eval`. |
 
 ### Division Doc extras (not all were separate Cyrex tool names)
 
-| Intent (Division Doc) | Toolbox |
-|----------------------|---------|
-| File ops | `SandboxedFileToolbox`; runner: `file_read`, `file_write`, `file_list_dir`, `file_stat` (requires `files=`) |
-| Calendar | `GoogleCalendarClient`, `ListEventsQuery`, `CreateEventRequest`; runner: `calendar_list_events`, `calendar_create_event` (requires `calendar=`) |
-| CRM | `RestCrmClient`; runner: `crm_request` (requires `crm=`) |
+| Intent (Division Doc) | Toolbox                                                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| File ops              | `SandboxedFileToolbox`; runner: `file_read`, `file_write`, `file_list_dir`, `file_stat` (requires `files=`)                                     |
+| Calendar              | `GoogleCalendarClient`, `ListEventsQuery`, `CreateEventRequest`; runner: `calendar_list_events`, `calendar_create_event` (requires `calendar=`) |
+| CRM                   | `RestCrmClient`; runner: `crm_request` (requires `crm=`)                                                                                        |
 
 ### Stays in Cyrex (do not move into this package for v1)
 
-| Cyrex tool / module | Reason |
-|---------------------|--------|
-| `db_query`, `db_execute`, `db_get_tables` | Postgres / `get_postgres_manager` |
-| `search_documents`, `call_external_api` | API bridge |
-| `search_web` | Placeholder / external API choice |
-| `api_tools.py` | Dynamic bridge tools |
+| Cyrex tool / module                                                            | Reason                                 |
+| ------------------------------------------------------------------------------ | -------------------------------------- |
+| `db_query`, `db_execute`, `db_get_tables`                                      | Postgres / `get_postgres_manager`      |
+| `search_documents`, `call_external_api`                                        | API bridge                             |
+| `search_web`                                                                   | Placeholder / external API choice      |
+| `api_tools.py`                                                                 | Dynamic bridge tools                   |
 | `memory_tools`, `pipeline_tools`, `spreadsheet_tools`, `vendor_fraud_tools`, … | Product-specific or DB/runtime coupled |
 
 ### `calculate`: migration from Cyrex
@@ -110,15 +110,37 @@ Prefer an explicit allowlist in production. See module docstrings for details.
 
 ## Modules
 
-| Module | Purpose |
-|--------|---------|
-| `diri_agent_toolbox.models` | `ToolResult`, `ToolDefinition`, JSON Schema helpers |
-| `diri_agent_toolbox.http` | `AsyncHttpToolbox`, `parse_json_or_text` |
-| `diri_agent_toolbox.data` | JSON, safe `calculate`, statistics, text helpers, `current_time` |
-| `diri_agent_toolbox.files` | `SandboxedFileToolbox` (async, under `root_dir`) |
-| `diri_agent_toolbox.calendar_api` | DTOs, `CalendarClient` protocol, `GoogleCalendarClient` |
-| `diri_agent_toolbox.crm` | DTOs, `RestCrmClient` |
-| `diri_agent_toolbox.runner` | `ToolRunner` — execute named portable tools |
+| Module                            | Purpose                                                          |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `diri_agent_toolbox.models`       | `ToolResult`, `ToolDefinition`, JSON Schema helpers              |
+| `diri_agent_toolbox.http`         | `AsyncHttpToolbox`, `parse_json_or_text`                         |
+| `diri_agent_toolbox.data`         | JSON, safe `calculate`, statistics, text helpers, `current_time` |
+| `diri_agent_toolbox.files`        | `SandboxedFileToolbox` (async, under `root_dir`)                 |
+| `diri_agent_toolbox.calendar_api` | DTOs, `CalendarClient` protocol, `GoogleCalendarClient`          |
+| `diri_agent_toolbox.crm`          | DTOs, `RestCrmClient`                                            |
+| `diri_agent_toolbox.runner`       | `ToolRunner` — execute named portable tools                      |
+
+## Development
+
+Install dev dependencies and run the same checks as CI:
+
+run everything via `./scripts/local-ci.sh` or manually with:
+
+```bash
+pip install -e ".[dev]"
+python -m ruff check src tests      # lint (imports, bugs, style rules)
+python -m ruff format --check src tests  # formatting must match ruff format
+python -m mypy src
+pytest
+```
+
+**Pre-commit** (optional, runs ruff + mypy before each commit):
+
+run via `./scripts/pre-commit-check.sh` to activate pre-commit check
+
+afterward, optionall run `python -m pre_commit run --all-files` to manually check
+
+Auto-fix formatting locally: `python -m ruff format src tests`
 
 ## License
 
