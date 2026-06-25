@@ -118,8 +118,7 @@ class StreamingClient:
                 else:
                     messages = cast(
                         list[tuple[str, list[tuple[str, dict[str, Any]]]]],
-                        await self.redis.xread({topic: last_id}, count=10, block=block_ms)
-                        or [],
+                        await self.redis.xread({topic: last_id}, count=10, block=block_ms) or [],
                     )
 
                 for _stream_name, stream_messages in messages:
