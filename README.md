@@ -64,10 +64,18 @@ Cyrex used `eval()` with a filtered namespace and a **character allowlist** (inc
 pip install diri-agent-toolbox
 ```
 
-Editable (monorepo sibling of `deepiri-platform`):
+With Poetry (recommended for development):
+
+```bash
+poetry add diri-agent-toolbox
+```
+
+Editable (monorepo sibling):
 
 ```bash
 pip install -e ../../diri-agent-toolbox
+# or with poetry:
+poetry add --editable ../../diri-agent-toolbox
 ```
 
 From Git:
@@ -139,12 +147,20 @@ Prefer an explicit allowlist in production. See module docstrings for details.
 
 Install dev dependencies and run the same checks as CI:
 
-run everything via `./scripts/local-ci.sh` or manually with:
+```bash
+poetry install
+poetry run ruff check src tests      # lint (imports, bugs, style rules)
+poetry run ruff format --check src tests  # formatting must match ruff format
+poetry run mypy src
+poetry run pytest
+```
+
+Or with pip:
 
 ```bash
 pip install -e ".[dev]"
-python -m ruff check src tests      # lint (imports, bugs, style rules)
-python -m ruff format --check src tests  # formatting must match ruff format
+python -m ruff check src tests
+python -m ruff format --check src tests
 python -m mypy src
 pytest
 ```

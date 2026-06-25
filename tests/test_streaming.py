@@ -45,7 +45,7 @@ async def test_streaming_client_publish():
     mock_instance.xadd = AsyncMock(return_value="12345-0")
     mock_redis_module.from_url.return_value = mock_instance
 
-    with patch.dict("sys.modules", {"redis.asyncio": mock_redis_module}):
+    with patch.dict("sys.modules", {"redis": MagicMock(), "redis.asyncio": mock_redis_module}):
         from diri_agent_toolbox.streaming import StreamingClient
 
         client = StreamingClient(redis_url="redis://localhost:6379/0")
@@ -64,7 +64,7 @@ async def test_streaming_client_connect():
     mock_redis_module.Redis.return_value = mock_instance
     mock_redis_module.from_url.return_value = mock_instance
 
-    with patch.dict("sys.modules", {"redis.asyncio": mock_redis_module}):
+    with patch.dict("sys.modules", {"redis": MagicMock(), "redis.asyncio": mock_redis_module}):
         from diri_agent_toolbox.streaming import StreamingClient
 
         client = StreamingClient(redis_host="localhost", redis_port=6379)
@@ -77,7 +77,7 @@ async def test_streaming_client_connect():
 async def test_streaming_client_stop():
     mock_redis_module = MagicMock()
 
-    with patch.dict("sys.modules", {"redis.asyncio": mock_redis_module}):
+    with patch.dict("sys.modules", {"redis": MagicMock(), "redis.asyncio": mock_redis_module}):
         from diri_agent_toolbox.streaming import StreamingClient
 
         client = StreamingClient(redis_url="redis://localhost:6379/0")
@@ -94,7 +94,7 @@ async def test_streaming_client_disconnect():
     mock_instance.close = AsyncMock()
     mock_redis_module.from_url.return_value = mock_instance
 
-    with patch.dict("sys.modules", {"redis.asyncio": mock_redis_module}):
+    with patch.dict("sys.modules", {"redis": MagicMock(), "redis.asyncio": mock_redis_module}):
         from diri_agent_toolbox.streaming import StreamingClient
 
         client = StreamingClient(redis_url="redis://localhost:6379/0")
