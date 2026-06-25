@@ -24,3 +24,23 @@ class FileToolboxError(ToolboxError):
 
 class ConfigurationToolboxError(ToolboxError):
     """Missing or invalid toolbox configuration."""
+
+
+class DatabaseToolboxError(ToolboxError):
+    """Database operation failure."""
+
+
+class CacheToolboxError(ToolboxError):
+    """Cache operation failure."""
+
+
+class StreamingToolboxError(ToolboxError):
+    """Streaming/event operation failure."""
+
+
+class DeviceToolboxError(ToolboxError):
+    """Device or hardware detection failure."""
+
+
+class ConfidenceToolboxError(ToolboxError):
+    """Confidence calculation failure."""

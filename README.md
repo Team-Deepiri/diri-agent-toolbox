@@ -79,6 +79,11 @@ pip install "git+https://github.com/Team-Deepiri/diri-agent-toolbox.git"
 ### Extras
 
 - `langchain`: `pip install diri-agent-toolbox[langchain]` for optional LangChain `StructuredTool` helpers.
+- `redis`: `pip install diri-agent-toolbox[redis]` for Redis-backed caching and streaming.
+- `numpy`: `pip install diri-agent-toolbox[numpy]` for confidence scoring with NumPy.
+- `torch`: `pip install diri-agent-toolbox[torch]` for GPU/device detection.
+- `database`: `pip install diri-agent-toolbox[database]` for async PostgreSQL via asyncpg.
+- `all`: `pip install diri-agent-toolbox[all]` installs everything.
 
 ## Quick start
 
@@ -104,7 +109,8 @@ asyncio.run(main())
 Agent-facing HTTP is dangerous (SSRF). `AsyncHttpToolbox` supports:
 
 - `allowed_url_prefixes`: only URLs starting with one of these strings are allowed (optional; if empty/`None`, prefix check is skipped).
-- `block_private_hosts`: blocks hostnames that resolve to private/link-local IPs is **not** fully implemented; **literal** IPv4/IPv6 addresses are checked with `ipaddress` and blocked when `block_private_hosts=True`.
+- `block_private_hosts`: blocks literal private/loopback IPv4/IPv6 addresses (checked with `ipaddress`).
+- `resolve_dns`: when `True`, performs DNS resolution and blocks hosts that resolve to private/loopback ranges (opt-in to avoid breaking tests with non-resolving mock domains; default `False`).
 
 Prefer an explicit allowlist in production. See module docstrings for details.
 
@@ -119,6 +125,15 @@ Prefer an explicit allowlist in production. See module docstrings for details.
 | `diri_agent_toolbox.calendar_api` | DTOs, `CalendarClient` protocol, `GoogleCalendarClient`          |
 | `diri_agent_toolbox.crm`          | DTOs, `RestCrmClient`                                            |
 | `diri_agent_toolbox.runner`       | `ToolRunner` — execute named portable tools                      |
+| `diri_agent_toolbox.caching`      | `AdvancedCacheManager`, `EmbeddingCache` (Redis + memory LRU)    |
+| `diri_agent_toolbox.confidence`   | `ConfidenceCalculator`, scoring, uncertainty estimation          |
+| `diri_agent_toolbox.contracts`    | Model contracts, events (Pydantic), AIModel/Service protocols    |
+| `diri_agent_toolbox.database`     | `DatabaseToolbox` — async PostgreSQL with asyncpg                |
+| `diri_agent_toolbox.device`       | GPU/device detection (CUDA, MPS, CPU fallback)                   |
+| `diri_agent_toolbox.logging`      | `StructuredLogger`, `JsonFormatter`, `ErrorLogger`               |
+| `diri_agent_toolbox.monitoring`   | `MetricsCollector` — JSONL metrics + alerts                      |
+| `diri_agent_toolbox.processing`   | `AsyncBatchProcessor`, `AsyncItemProcessor` — batched/stream     |
+| `diri_agent_toolbox.streaming`    | `StreamingClient` — Redis Streams pub/sub, consumer groups       |
 
 ## Development
 

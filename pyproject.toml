@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "diri-agent-toolbox"
-version = "0.1.0"
-description = "Reusable typed agent tooling: HTTP, data, files, calendar, CRM primitives for LLM agents"
+version = "0.2.0"
+description = "Reusable typed agent tooling: HTTP, data, files, calendar, CRM, database, caching, streaming, contracts, confidence, device, processing, logging, monitoring primitives for LLM agents"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
@@ -27,6 +27,24 @@ dev = [
 langchain = [
     "langchain-core>=0.3.0",
 ]
+redis = [
+    "redis>=5.0.0",
+]
+numpy = [
+    "numpy>=1.24.0",
+]
+torch = [
+    "torch>=2.0.0",
+]
+database = [
+    "asyncpg>=0.30.0",
+]
+all = [
+    "diri-agent-toolbox[langchain,redis,numpy,torch,database]",
+]
+
+[project.urls]
+Homepage = "https://github.com/Team-Deepiri/diri-agent-toolbox"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -41,6 +59,7 @@ select = ["E", "F", "I", "B"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "-q"
+testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.11"
