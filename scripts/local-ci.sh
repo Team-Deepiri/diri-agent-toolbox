@@ -7,12 +7,11 @@ set -euo pipefail
 
 source .venv/bin/activate
 
-python -m pip install -U pip
-python -m pip install -e ".[dev]"
+poetry install --with dev --no-interaction
 
-python -m ruff check src tests
-python -m ruff format --check src tests
-python -m mypy src
-python -m pytest
+poetry run ruff check src tests
+poetry run ruff format --check src tests
+poetry run mypy src
+poetry run pytest
 
 echo "local-ci: all checks passed"
