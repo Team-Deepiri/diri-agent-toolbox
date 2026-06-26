@@ -1142,10 +1142,9 @@ files = [
 name = "numpy"
 version = "2.4.6"
 description = "Fundamental package for array computing in Python"
-optional = true
+optional = false
 python-versions = ">=3.11"
-groups = ["main"]
-markers = "python_version < \"3.15\" and (extra == \"numpy\" or extra == \"all\")"
+groups = ["main", "dev"]
 files = [
     {file = "numpy-2.4.6-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0280e0356c0829a18d9de1cb7eee50ec22ca639878d7240307ca0943d73cd2c4"},
     {file = "numpy-2.4.6-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:110f8b71aacb688ec69062bb7f6938a0f8acb01b7c1c4beb453c65b6d234584d"},
@@ -1220,15 +1219,15 @@ files = [
     {file = "numpy-2.4.6-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:2803abfebfc990042cd494d8ce2d5f82e9d847af6d35ec486923aa19dbad5e73"},
     {file = "numpy-2.4.6.tar.gz", hash = "sha256:f3a3570c4a2a16746ac2c31a7c7c7b0c186b95ce902e33db6f28094ed7387dda"},
 ]
+markers = {main = "python_version < \"3.15\" and (extra == \"numpy\" or extra == \"all\")", dev = "python_version < \"3.15\""}
 
 [[package]]
 name = "numpy"
 version = "2.5.0"
 description = "Fundamental package for array computing in Python"
-optional = true
+optional = false
 python-versions = ">=3.12"
-groups = ["main"]
-markers = "python_version >= \"3.15\" and (extra == \"numpy\" or extra == \"all\")"
+groups = ["main", "dev"]
 files = [
     {file = "numpy-2.5.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:489780423903667933b4ed6197b6ec3b75ea5dd17d1d8f0f38d798feb6921561"},
     {file = "numpy-2.5.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ece55976ced6bca95a03ae2839e2e5ccffe8eb6a3e7022415645eb154a81e4e6"},
@@ -1275,6 +1274,7 @@ files = [
     {file = "numpy-2.5.0-cp314-cp314t-win_arm64.whl", hash = "sha256:016623417bb330d719d579daf2d6b9a01ddc52e41a9ed61a47f39fde46dcd865"},
     {file = "numpy-2.5.0.tar.gz", hash = "sha256:5a129578019311b6e56bdd714250f19b518f7dceeeb8d1af5490f4942d3f891c"},
 ]
+markers = {main = "python_version >= \"3.15\" and (extra == \"numpy\" or extra == \"all\")", dev = "python_version >= \"3.15\""}
 
 [[package]]
 name = "nvidia-cublas"
@@ -3131,4 +3131,4 @@ torch = ["torch"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "4718473b15c89c143f485c579f990089e89e7d6b502178984521d35b39ba0592"
+content-hash = "40554db39bfc3cbb8e584125d7db63f1a2832fbd71ef223f8611d4145b6ea675"

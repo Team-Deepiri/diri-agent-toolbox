@@ -32,6 +32,7 @@ types-aiofiles = ">=24.1.0"
 pre-commit = ">=4.0.0"
 redis = ">=5.0.0"
 torch = ">=2.0.0"
+numpy = ">=1.24.0"
 
 [tool.poetry.extras]
 langchain = ["langchain-core"]

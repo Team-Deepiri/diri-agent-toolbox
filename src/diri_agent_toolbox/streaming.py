@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, AsyncIterator, Callable, Dict, Optional
+from typing import Any, AsyncIterator, Callable, Dict, Optional, cast
 
 from diri_agent_toolbox.contracts import BaseEvent
 
@@ -73,7 +73,12 @@ class StreamingClient:
     ) -> str:
         if "timestamp" not in event:
             event["timestamp"] = datetime.now(timezone.utc).isoformat()
-        message_id = await self.redis.xadd(topic, event, maxlen=max_length, approximate=True)
+        message_id = await self.redis.xadd(
+            topic,
+            cast(Any, event),
+            maxlen=max_length,
+            approximate=True,
+        )
         return str(message_id)
 
     async def subscribe(
@@ -99,15 +104,22 @@ class StreamingClient:
         while self._running:
             try:
                 if consumer_group and consumer_name:
-                    messages = await self.redis.xreadgroup(
-                        consumer_group,
-                        consumer_name,
-                        {topic: ">"},
-                        count=10,
-                        block=block_ms,
+                    messages = cast(
+                        list[tuple[str, list[tuple[str, dict[str, Any]]]]],
+                        await self.redis.xreadgroup(
+                            consumer_group,
+                            consumer_name,
+                            {topic: ">"},
+                            count=10,
+                            block=block_ms,
+                        )
+                        or [],
                     )
                 else:
-                    messages = await self.redis.xread({topic: last_id}, count=10, block=block_ms)
+                    messages = cast(
+                        list[tuple[str, list[tuple[str, dict[str, Any]]]]],
+                        await self.redis.xread({topic: last_id}, count=10, block=block_ms) or [],
+                    )
 
                 for _stream_name, stream_messages in messages:
                     for msg_id, data in stream_messages:
