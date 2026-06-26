@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from diri_agent_toolbox import data as data_ops
 from diri_agent_toolbox.calendar_api import CalendarClient, CreateEventRequest, ListEventsQuery
 from diri_agent_toolbox.crm import RestCrmClient
+from diri_agent_toolbox.database import DatabaseToolbox
 from diri_agent_toolbox.files import SandboxedFileToolbox
 from diri_agent_toolbox.http import AsyncHttpToolbox
 from diri_agent_toolbox.models import ToolCategory, ToolDefinition, ToolResult
@@ -27,11 +28,13 @@ class ToolRunner:
         files: SandboxedFileToolbox | None = None,
         calendar: CalendarClient | None = None,
         crm: RestCrmClient | None = None,
+        database: DatabaseToolbox | None = None,
     ) -> None:
         self._http = http
         self._files = files
         self._calendar = calendar
         self._crm = crm
+        self._database = database
         self._impls: dict[str, Callable[..., Awaitable[ToolResult]]] = {}
         self._defs: dict[str, ToolDefinition] = {}
         self._register_all()
@@ -359,6 +362,53 @@ class ToolRunner:
                 crm_request,
             )
 
+        if self._database is not None:
+            db = self._database
+
+            async def db_query(query: str, *params):
+                return await db.query(query, *params)
+
+            async def db_execute(query: str, *params):
+                return await db.execute(query, *params)
+
+            async def db_get_tables():
+                return await db.get_tables()
+
+            self._add(
+                ToolDefinition(
+                    name="db_query",
+                    description="Execute a database SELECT query",
+                    category=ToolCategory.DATABASE,
+                    parameters={
+                        "query": {"type": "string", "description": "SQL SELECT query"},
+                    },
+                    required_params=["query"],
+                ),
+                lambda query: db.query(query),
+            )
+            self._add(
+                ToolDefinition(
+                    name="db_execute",
+                    description="Execute a database write operation (INSERT, UPDATE, DELETE)",
+                    category=ToolCategory.DATABASE,
+                    parameters={
+                        "query": {"type": "string", "description": "SQL query"},
+                    },
+                    required_params=["query"],
+                ),
+                lambda query: db.execute(query),
+            )
+            self._add(
+                ToolDefinition(
+                    name="db_get_tables",
+                    description="List all tables in the database",
+                    category=ToolCategory.DATABASE,
+                    parameters={},
+                    required_params=[],
+                ),
+                db.get_tables,
+            )
+
     def list_tools(self, category: ToolCategory | None = None) -> list[ToolDefinition]:
         tools = list(self._defs.values())
         if category is not None:
@@ -372,10 +422,10 @@ class ToolRunner:
         if tool_name not in self._impls:
             return ToolResult(success=False, error=f"Tool not found: {tool_name}")
         impl = self._impls[tool_name]
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         try:
             out = await impl(**kwargs)
-            elapsed = (datetime.utcnow() - start).total_seconds() * 1000
+            elapsed = (datetime.now(timezone.utc) - start).total_seconds() * 1000
             if out.execution_time_ms == 0.0:
                 out.execution_time_ms = elapsed
             return out

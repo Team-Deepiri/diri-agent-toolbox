@@ -1,35 +1,45 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "diri-agent-toolbox"
-version = "0.1.0"
-description = "Reusable typed agent tooling: HTTP, data, files, calendar, CRM primitives for LLM agents"
+version = "0.2.0"
+description = "Reusable typed agent tooling: HTTP, data, files, calendar, CRM, database, caching, streaming, contracts, confidence, device, processing, logging, monitoring primitives for LLM agents"
 readme = "README.md"
-license = { text = "Apache-2.0" }
-requires-python = ">=3.11"
-dependencies = [
-    "httpx>=0.27.0",
-    "pydantic>=2.8.0",
-    "aiofiles>=24.1.0",
-]
+license = "Apache-2.0"
+homepage = "https://github.com/Team-Deepiri/diri-agent-toolbox"
+packages = [{ include = "diri_agent_toolbox", from = "src" }]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.24.0",
-    "ruff>=0.6.0",
-    "mypy>=1.11.0",
-    "types-aiofiles>=24.1.0",
-    "pre-commit>=4.0.0",
-]
-langchain = [
-    "langchain-core>=0.3.0",
-]
+[tool.poetry.dependencies]
+python = ">=3.11"
+httpx = ">=0.27.0"
+pydantic = ">=2.8.0"
+aiofiles = ">=24.1.0"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+langchain-core = { version = ">=0.3.0", optional = true }
+redis = { version = ">=5.0.0", optional = true }
+numpy = { version = ">=1.24.0", optional = true }
+torch = { version = ">=2.0.0", optional = true }
+asyncpg = { version = ">=0.30.0", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0.0"
+pytest-asyncio = ">=0.24.0"
+ruff = ">=0.6.0"
+mypy = ">=1.11.0"
+types-aiofiles = ">=24.1.0"
+pre-commit = ">=4.0.0"
+redis = ">=5.0.0"
+torch = ">=2.0.0"
+
+[tool.poetry.extras]
+langchain = ["langchain-core"]
+redis = ["redis"]
+numpy = ["numpy"]
+torch = ["torch"]
+database = ["asyncpg"]
+all = ["langchain-core", "redis", "numpy", "torch", "asyncpg"]
 
 [tool.ruff]
 line-length = 100
@@ -41,6 +51,7 @@ select = ["E", "F", "I", "B"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "-q"
+testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.11"
