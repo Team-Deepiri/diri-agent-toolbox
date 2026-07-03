@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import ipaddress
+import socket
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from inspect import isawaitable
 from typing import Any
 from urllib.parse import urlparse
@@ -63,12 +65,14 @@ class AsyncHttpToolbox:
         allowed_url_prefixes: list[str] | None = None,
         url_policy: UrlPolicy | None = None,
         block_private_hosts: bool = True,
+        resolve_dns: bool = False,
         headers: dict[str, str] | None = None,
     ) -> None:
         self._timeout = timeout
         self._allowed_prefixes = allowed_url_prefixes
         self._url_policy = url_policy
         self._block_private_hosts = block_private_hosts
+        self._resolve_dns = resolve_dns
         self._client: httpx.AsyncClient | None = None
         self._default_headers = headers or {}
 
@@ -88,32 +92,48 @@ class AsyncHttpToolbox:
     async def _enforce_policy(self, url: str) -> None:
         if not default_prefix_url_policy(url, self._allowed_prefixes):
             raise ValidationToolboxError(
-                f"URL not allowed by prefix policy: {url}",
-                code="url_prefix_denied",
+                f"URL not allowed by prefix policy: {url}", code="url_prefix_denied"
             )
         parsed = urlparse(url)
         if parsed.scheme not in ("http", "https"):
             raise ValidationToolboxError(
-                f"URL scheme not allowed: {parsed.scheme}",
-                code="url_scheme_denied",
+                f"URL scheme not allowed: {parsed.scheme}", code="url_scheme_denied"
             )
         host = parsed.hostname
         if host is None:
             raise ValidationToolboxError("URL has no host", code="url_no_host")
-        if self._block_private_hosts and _is_literal_private_or_loopback_host(host):
-            raise ValidationToolboxError(
-                f"Host not allowed (private/loopback IP): {host}",
-                code="url_host_blocked",
-            )
+        if self._block_private_hosts:
+            if _is_literal_private_or_loopback_host(host):
+                raise ValidationToolboxError(
+                    f"Host is private/loopback IP: {host}", code="host_blocked_private_ip"
+                )
+            if self._resolve_dns:
+                await self._resolve_host(host)
         if self._url_policy is not None:
             ok = self._url_policy(url)
             if isawaitable(ok):
                 ok = await ok
             if not ok:
                 raise ValidationToolboxError(
-                    "URL rejected by custom url_policy",
-                    code="url_policy_denied",
+                    "URL rejected by custom url_policy", code="url_policy_denied"
                 )
+
+    async def _resolve_host(self, host: str) -> None:
+        """Resolve hostname via DNS and block if any IP is private/loopback."""
+        loop = asyncio.get_event_loop()
+        try:
+            addrinfo = await loop.getaddrinfo(host, None)
+            for _family, _type, _proto, _canonname, sockaddr in addrinfo:
+                ip_str = sockaddr[0]
+                if _is_literal_private_or_loopback_host(ip_str):
+                    raise ValidationToolboxError(
+                        f"Host {host} resolves to private/loopback IP: {ip_str}",
+                        code="host_resolves_to_private",
+                    )
+        except socket.gaierror as e:
+            raise ValidationToolboxError(
+                f"DNS resolution failed for {host}: {e}", code="dns_resolution_failed"
+            ) from None
 
     async def get(
         self,
@@ -122,7 +142,7 @@ class AsyncHttpToolbox:
         headers: dict[str, str] | None = None,
         params: dict[str, Any] | None = None,
     ) -> ToolResult:
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         try:
             await self._enforce_policy(url)
             client = await self._get_client()
@@ -144,7 +164,7 @@ class AsyncHttpToolbox:
         json_body: Any = None,
         headers: dict[str, str] | None = None,
     ) -> ToolResult:
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         try:
             await self._enforce_policy(url)
             client = await self._get_client()
@@ -170,7 +190,7 @@ class AsyncHttpToolbox:
         - GET/HEAD/DELETE: uses query_params only (no JSON body).
         - POST/PUT/PATCH: sends json_body if provided, else content.
         """
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         m = method.upper()
         try:
             await self._enforce_policy(url)
@@ -194,7 +214,7 @@ class AsyncHttpToolbox:
             return ToolResult(success=False, error=str(e), metadata={"code": "http_error"})
 
     def _to_tool_result(self, response: httpx.Response, start: datetime) -> ToolResult:
-        elapsed_ms = (datetime.utcnow() - start).total_seconds() * 1000
+        elapsed_ms = (datetime.now(timezone.utc) - start).total_seconds() * 1000
         body = parse_json_or_text(response)
         return ToolResult(
             success=response.is_success,

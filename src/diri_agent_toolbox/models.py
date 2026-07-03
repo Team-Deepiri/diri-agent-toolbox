@@ -18,6 +18,15 @@ class ToolCategory(str, Enum):
     DATA = "data"
     CALENDAR = "calendar"
     CRM = "crm"
+    DATABASE = "database"
+    CACHE = "cache"
+    STREAMING = "streaming"
+    DEVICE = "device"
+    CONFIDENCE = "confidence"
+    PROCESSING = "processing"
+    MONITORING = "monitoring"
+    LOGGING = "logging"
+    SYSTEM = "system"
 
 
 class ToolResult(BaseModel):

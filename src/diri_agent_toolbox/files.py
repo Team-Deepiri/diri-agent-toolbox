@@ -115,3 +115,73 @@ class SandboxedFileToolbox:
             return ToolResult(success=False, error=e.message, metadata={"code": e.code or ""})
         except OSError as e:
             return ToolResult(success=False, error=str(e), metadata={"code": "os_error"})
+
+    async def delete(self, relative_path: str) -> ToolResult:
+        try:
+            path = _resolve_under_root(self.root_dir, relative_path)
+            is_file = await asyncio.to_thread(path.is_file)
+            if not is_file:
+                return ToolResult(success=False, error="Not a file", metadata={"path": str(path)})
+            await asyncio.to_thread(path.unlink)
+            return ToolResult(success=True, result=f"Deleted {path}", metadata={"path": str(path)})
+        except ValidationToolboxError as e:
+            return ToolResult(success=False, error=e.message, metadata={"code": e.code or ""})
+        except OSError as e:
+            return ToolResult(success=False, error=str(e), metadata={"code": "os_error"})
+
+    async def copy(self, src: str, dst: str) -> ToolResult:
+        try:
+            import shutil
+
+            src_path = _resolve_under_root(self.root_dir, src)
+            dst_path = _resolve_under_root(self.root_dir, dst)
+            await asyncio.to_thread(shutil.copy2, src_path, dst_path)
+            return ToolResult(
+                success=True,
+                result=f"Copied {src} to {dst}",
+                metadata={"src": str(src_path), "dst": str(dst_path)},
+            )
+        except ValidationToolboxError as e:
+            return ToolResult(success=False, error=e.message, metadata={"code": e.code or ""})
+        except OSError as e:
+            return ToolResult(success=False, error=str(e), metadata={"code": "os_error"})
+
+    async def move(self, src: str, dst: str) -> ToolResult:
+        try:
+            import shutil
+
+            src_path = _resolve_under_root(self.root_dir, src)
+            dst_path = _resolve_under_root(self.root_dir, dst)
+            await asyncio.to_thread(shutil.move, src_path, dst_path)
+            return ToolResult(
+                success=True,
+                result=f"Moved {src} to {dst}",
+                metadata={"src": str(src_path), "dst": str(dst_path)},
+            )
+        except ValidationToolboxError as e:
+            return ToolResult(success=False, error=e.message, metadata={"code": e.code or ""})
+        except OSError as e:
+            return ToolResult(success=False, error=str(e), metadata={"code": "os_error"})
+
+    async def read_binary(self, relative_path: str) -> ToolResult:
+        try:
+            path = _resolve_under_root(self.root_dir, relative_path)
+            is_file = await asyncio.to_thread(path.is_file)
+            if not is_file:
+                return ToolResult(success=False, error="Not a file", metadata={"path": str(path)})
+            size = await asyncio.to_thread(_file_size, path)
+            if size > self.max_read_bytes:
+                return ToolResult(
+                    success=False,
+                    error=f"File too large ({size} > {self.max_read_bytes})",
+                    metadata={"path": str(path)},
+                )
+            async with aiofiles.open(path, "rb") as f:
+                content = await f.read()
+            return ToolResult(
+                success=True, result=content, metadata={"path": str(path), "size": size}
+            )
+        except ValidationToolboxError as e:
+            return ToolResult(success=False, error=e.message, metadata={"code": e.code or ""})
+        except OSError as e:
+            return ToolResult(success=False, error=str(e), metadata={"code": "os_error"})

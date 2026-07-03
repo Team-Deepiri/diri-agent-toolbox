@@ -7,8 +7,7 @@ set -euo pipefail
 
 source .venv/bin/activate
 
-python -m pip install -U pip
-python -m pip install -e ".[dev]"
+poetry install --with dev --no-interaction
 
 python -m pre_commit install
 
