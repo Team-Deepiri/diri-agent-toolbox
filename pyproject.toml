@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "diri-agent-toolbox"
-version = "0.2.0"
+version = "0.2.1"
 description = "Reusable typed agent tooling: HTTP, data, files, calendar, CRM, database, caching, streaming, contracts, confidence, device, processing, logging, monitoring primitives for LLM agents"
 readme = "README.md"
 license = "Apache-2.0"
