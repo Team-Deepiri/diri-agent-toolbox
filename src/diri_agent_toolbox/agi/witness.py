@@ -74,8 +74,7 @@ def rank_witness_quotes(
         ]
     else:
         scored = [
-            {"quote": quote, "score": _overlap_fallback(question, quote)}
-            for quote in cleaned
+            {"quote": quote, "score": _overlap_fallback(question, quote)} for quote in cleaned
         ]
 
     scored.sort(key=lambda row: row["score"], reverse=True)

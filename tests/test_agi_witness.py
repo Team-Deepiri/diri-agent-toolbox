@@ -1,6 +1,10 @@
 """Tests for embedding-based witness scoring."""
 
-from diri_agent_toolbox.agi.witness import cosine_similarity, rank_witness_quotes, score_witness_match
+from diri_agent_toolbox.agi.witness import (
+    cosine_similarity,
+    rank_witness_quotes,
+    score_witness_match,
+)
 
 
 def _mock_embedder(texts):
